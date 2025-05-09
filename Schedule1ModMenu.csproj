@@ -186,6 +186,9 @@
 		<Reference Include="Il2Cpp__Generated">
 			<HintPath>D:\SteamLibrary\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Il2Cpp__Generated.dll</HintPath>
 		</Reference>
+		<Reference Include="S1API">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Schedule I\Mods\S1API.Il2Cpp.MelonLoader.dll</HintPath>
+		</Reference>
 		<Reference Include="Unity.AI.Navigation">
 			<HintPath>D:\SteamLibrary\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Unity.AI.Navigation.dll</HintPath>
 		</Reference>
@@ -494,21 +497,8 @@
 	<ItemGroup>
 		<Compile Include="Core.cs" />
 		<Compile Include="ModState.cs" />
-		<Compile Include="Patches.cs" />
+		<Compile Include="PhoneModMenu.cs" />
 		<Compile Include="PlayerContext.cs" />
-		<Compile Include="Assets.Designer.cs">
-		  <DesignTime>True</DesignTime>
-		  <AutoGen>True</AutoGen>
-		  <DependentUpon>Assets.resx</DependentUpon>
-		</Compile>
-		<Compile Include="UIModMenu.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <EmbeddedResource Update="Assets.resx">
-	    <Generator>ResXFileCodeGenerator</Generator>
-	    <LastGenOutput>Assets.Designer.cs</LastGenOutput>
-	  </EmbeddedResource>
 	</ItemGroup>
 	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

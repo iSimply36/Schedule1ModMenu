@@ -3,6 +3,7 @@ namespace Schedule1ModMenu
 {
     internal static class ModState
     {
+        
         public enum ModStatus
         {
             Uninitialized,

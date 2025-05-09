@@ -7,8 +7,12 @@ using UnityEngine;
 
 namespace Schedule1ModMenu
 {
+
     public class PlayerContext
     {
+        public static PlayerContext instance { get; private set; } = new PlayerContext();
+
+
         public GameObject gameObj;
         public PlayerHealth health;
         public PlayerCamera cameraScript;

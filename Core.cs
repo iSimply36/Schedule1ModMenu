@@ -6,6 +6,7 @@ using Il2CppScheduleOne.PlayerScripts.Health;
 using Il2CppScheduleOne.Stealth;
 using Il2CppScheduleOne.UI;
 using MelonLoader;
+using S1API.Money;
 using System.Collections;
 using UnityEngine;
 
@@ -26,8 +27,6 @@ namespace Schedule1ModMenu
         public const KeyCode moneyButton = KeyCode.Keypad1;
         public string steamID;
 
-        private PlayerContext playerContext = new PlayerContext();
-        private MoneyManager moneyScript;
         private bool moneySpamDelay = false;
 
 
@@ -45,16 +44,6 @@ namespace Schedule1ModMenu
             if (buildIndex == 1)
             {
                 LoggerInstance.Msg("Main Scene Was Loaded, intializing resources");
-                GameObject tempmoneyObj = GameObject.Find(MONEY_OBJECT_NAME);
-                if (tempmoneyObj != null)
-                {
-                    moneyScript = tempmoneyObj.GetComponent<MoneyManager>();
-                }
-                else
-                {
-                    LoggerInstance.Error("Failed to Get MoneyObject");
-                }
-
                 LoggerInstance.Msg("Waiting for Player To Load...");
                 MelonCoroutines.Start(DelayGetResources(3));
 
@@ -64,23 +53,18 @@ namespace Schedule1ModMenu
 
         public override void OnLateUpdate()
         {
-            if (playerContext.isInvincible)
+            if (PlayerContext.instance.isInvincible)
             {
-                if (playerContext.health.CurrentHealth < 100)
+                if (PlayerContext.instance.health.CurrentHealth < 100)
                 {
-                    playerContext.health.SetHealth(100);
+                    PlayerContext.instance.health.SetHealth(100);
                 }
             }
-            if (playerContext.moneySpam && !moneySpamDelay)
+            if (PlayerContext.instance.moneySpam && !moneySpamDelay)
             {
-                moneyScript.ChangeCashBalance(1000, true, true);
+                Money.ChangeCashBalance(1000, true, true);
                 moneySpamDelay = true;
                 MelonCoroutines.Start(DelayMoneySpam());
-            }
-
-            if (Input.GetKeyDown(moneyButton))
-            {
-                UIModMenu.Instance.ToggleMenu();
             }
         }
 
@@ -111,42 +95,21 @@ namespace Schedule1ModMenu
 
         public void SetPlayerInput(bool isMenuOpen)
         {
-            bool state = !isMenuOpen && !playerContext.gameplayMenu.IsOpen;
+            bool state = !isMenuOpen && !PlayerContext.instance.gameplayMenu.IsOpen;
 
             LoggerInstance.Msg("setting player input to: " + state);
 
-            if (playerContext.cameraScript != null)
-                if (playerContext.cameraScript.canLook != state)
-                    playerContext.cameraScript.SetCanLook(state);
-            if (playerContext.punchScript != null)
-                if (playerContext.punchScript.enabled != state)
-                    playerContext.punchScript.enabled = state;
+            if (PlayerContext.instance.cameraScript != null)
+                if (PlayerContext.instance.cameraScript.canLook != state)
+                    PlayerContext.instance.cameraScript.SetCanLook(state);
+            if (PlayerContext.instance.punchScript != null)
+                if (PlayerContext.instance.punchScript.enabled != state)
+                    PlayerContext.instance.punchScript.enabled = state;
 
             UnityEngine.Cursor.lockState = state ? CursorLockMode.Locked : CursorLockMode.None;
             UnityEngine.Cursor.visible = !state;
 
         }
-
-        //public override void OnGUI()
-        //{
-        //    if (ModState.IsReady && !ModState.MenuInitialized)
-        //    {
-        //        try
-        //        {
-        //            modMenu.Initialize(playerContext, moneyScript);
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            MelonLogger.Error("Error in OnGUI: " + e.Message + "\n" + e.StackTrace);
-        //            ModState.CurrentStatus = ModState.ModStatus.Error;
-        //        }
-        //    }
-
-        //    if (ModState.CurrentStatus == ModState.ModStatus.MenuOpen)
-        //    {
-        //        modMenu.Draw();
-        //    }
-        //}
 
 
         private IEnumerator DelayGetResources(float time)
@@ -158,6 +121,7 @@ namespace Schedule1ModMenu
 
         public void GetResources()
         {
+
             GameObject[] tempcameraObjs = GameObject.FindGameObjectsWithTag(MAIN_CAMERA_TAG);
             //LoggerInstance.Msg("cameraObjs found: " + tempcameraObjs.Length);
 
@@ -173,11 +137,11 @@ namespace Schedule1ModMenu
                         if (potentialPlayer.name.Trim().Contains(steamID.Trim()))
                         {
                             LoggerInstance.Msg("Found local player");
-                            playerContext.gameObj = potentialPlayer;
-                            playerContext.health = potentialPlayer.GetComponent<PlayerHealth>();
-                            playerContext.cameraScript = camera.GetComponent<PlayerCamera>();
-                            playerContext.punchScript = camera.GetComponentInChildren<PunchController>();
-                            playerContext.gameplayMenu = camera.GetComponentInChildren<GameplayMenu>();
+                            PlayerContext.instance.gameObj = potentialPlayer;
+                            PlayerContext.instance.health = potentialPlayer.GetComponent<PlayerHealth>();
+                            PlayerContext.instance.cameraScript = camera.GetComponent<PlayerCamera>();
+                            PlayerContext.instance.punchScript = camera.GetComponentInChildren<PunchController>();
+                            PlayerContext.instance.gameplayMenu = camera.GetComponentInChildren<GameplayMenu>();
 
                             break;
                         }
@@ -187,9 +151,9 @@ namespace Schedule1ModMenu
                         }
                     }
                 }
-            }
-            playerContext.movementScript = playerContext.gameObj.GetComponentInChildren<PlayerMovement>();
-            playerContext.visibilityScript = playerContext.gameObj.GetComponentInChildren<PlayerVisibility>();
+            }   
+            PlayerContext.instance.movementScript = PlayerContext.instance.gameObj.GetComponentInChildren<PlayerMovement>();
+            PlayerContext.instance.visibilityScript = PlayerContext.instance.gameObj.GetComponentInChildren<PlayerVisibility>();
             CheckInitialized();
         }
         public void CheckInitialized()
@@ -198,12 +162,11 @@ namespace Schedule1ModMenu
 
             var requiredComponents = new Dictionary<string, object>
             {
-                { "MoneyManager", moneyScript },
-                { "PlayerCamera", playerContext.cameraScript },
-                { "Player Object", playerContext.gameObj },
-                { "PunchController", playerContext.punchScript },
-                { "PlayerMovementScript", playerContext.movementScript },
-                { "PlayerVisibilityScript", playerContext.visibilityScript }
+                { "PlayerCamera", PlayerContext.instance.cameraScript },
+                { "Player Object", PlayerContext.instance.gameObj },
+                { "PunchController", PlayerContext.instance.punchScript },
+                { "PlayerMovementScript", PlayerContext.instance.movementScript },
+                { "PlayerVisibilityScript", PlayerContext.instance.visibilityScript }
             };
 
             bool errorDetected = false;
@@ -221,7 +184,6 @@ namespace Schedule1ModMenu
             {
                 ModState.CurrentStatus = ModState.ModStatus.Ready;
                 LoggerInstance.Msg("Resources successfully initialized!");
-                UIModMenu.Instance.LoadMenu(playerContext);
             }
             else
             {
